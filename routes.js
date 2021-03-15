@@ -116,7 +116,7 @@ app.get("/stock/:ticker", function(req, res, next){
             mongoose.connection.db.collection("users").findOne({_id: userid}, function(err, user){
 
                 //check if enough in wallet
-                if (user.wallet < (amt*data.price)) {
+                if (user.wallet < (amt * data.price)) {
                     res.status(401).json({error: "Not enough funds"});
                     return;
                 }
@@ -238,6 +238,68 @@ app.post("/subscribe/:ticker", function(req, res, next){
 });
 
 /**
+ * ADD FUNDS
+ * buy n number of a single stock
+ * 
+ * request: POST
+ * @param amt
+ */
+ app.post("/addFunds", function(req, res, next){
+    const amt = req.query.amt;
+
+    if (!amt) {
+        res.sendStatus(401).json({error: "Invalid parameters. Expected 'ticker' and 'amt'"});
+        return;
+    }
+
+    // check if logged in
+    auth(req, res, () => {
+        // logged in
+
+        //person is logged in, find their user profile in db
+        mongoose.connection.db.collection("users").findOne({_id: userid}, function(err, user){
+
+            //set our updated values
+            user.wallet += amt;
+            user.save(done);
+
+            res.status(200).json({success: "Added funds successfully!"});
+            return;
+        });
+    });
+});
+
+/**
+ * GET PORTFOLIO
+ * buy n number of a single stock
+ * 
+ * request: POST
+ * @param ticker
+ */
+ app.get("/portfolio", function(req, res, next){
+    const amt = req.query.amt;
+
+    // check if logged in
+    auth(req, res, () => {
+        // logged in
+
+        // check parameters
+        if (!amt) {
+            res.sendStatus(401).json({error: "Invalid parameters. Expected 'ticker' and 'amt'"});
+            return;
+        }
+
+        //person is logged in, find their user profile in db
+        mongoose.connection.db.collection("users").findOne({_id: userid}, function(err, user){
+
+            // return their portfolio
+            res.status(200).json(user.owned_shares);
+            return;
+        });
+    });
+});
+
+/**
  * USER LOGOUT
  * 
  * @request: POST
@@ -258,13 +320,13 @@ app.post("/logout", function(req, res, next){
  * @params: any
  */
 app.all("*",function(req,res){
-    res.set(404).json({error: 'Endpoint not found'});
+    res.status(404).json({error: 'Endpoint not found'});
 });
 
 //auth function
 function auth(req, res, next){
 	//Check req info, load user info, etc.
-	if (user.auth){ //Check if they are authorized
+	if (req.user && req.user.auth){ //Check if they are authorized
 		next();
 	}else{
 		res.status(401).json({error: "Authenitcation error"});
