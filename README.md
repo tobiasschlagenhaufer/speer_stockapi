@@ -16,8 +16,10 @@ And you're ready to make requests!
 
 ## Endpoints
 * /login (post)
-* /logout
-* /stock/<ticker>
-* /buy?ticker=""&amt=<>
-* /sell?ticker=""&amt=<>
-* /subscribe/<ticker>
+* /logout (post)
+* /portfolio (get)
+* /stock/<ticker> (get)
+* /buy?ticker=""&amt="" (post)
+* /sell?ticker=""&amt="" (post)
+* /subscribe/<ticker> (post)
+* /addFunds?amt="" (post)
